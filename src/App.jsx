@@ -41,7 +41,7 @@ const App = () => {
       setLoginEmail('');
       setLoginPassword('');
     } else {
-      alert('Invalid credentials. Use: admin@jobskenya.co.ke / admin123');
+      alert('Invalid credentials. Use: admin@jobskenya.co.ke / admin321');
     }
   };
 
