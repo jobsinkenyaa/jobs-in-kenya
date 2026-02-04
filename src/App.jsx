@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Briefcase, MapPin, Clock, DollarSign, Search, Filter, Building2, ChevronRight, Plus, Edit2, Trash2, X, LogIn, LogOut, Settings } from 'lucide-react';
+import { Briefcase, MapPin, Clock, DollarSign, Search, Filter, Building2, ChevronRight, Plus, Edit2, Trash2, X, LogIn, LogOut, Share2, Facebook, MessageCircle, Twitter, Linkedin } from 'lucide-react';
 
 const App = () => {
+  // ⚠️ CHANGE YOUR ADMIN CREDENTIALS HERE ⚠️
+  const ADMIN_EMAIL = 'admin@jobsinkenya.co.ke';
+  const ADMIN_PASSWORD = 'MySecurePassword2026!';
+  
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [currentView, setCurrentView] = useState('home');
@@ -15,14 +18,23 @@ const App = () => {
   const [showJobForm, setShowJobForm] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareJob, setShareJob] = useState(null);
   const [jobForm, setJobForm] = useState({
     title: '', company: '', location: '', type: 'Full-time',
     salary: '', category: 'Technology', description: '',
     requirements: '', contact_email: ''
   });
 
-  const categories = ['Technology', 'Marketing', 'Finance', 'Sales', 'HR', 'Design', 'Engineering'];
-  const locations = ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru'];
+  const categories = ['Technology', 'Marketing', 'Finance', 'Sales', 'HR', 'Design', 'Engineering', 'Healthcare', 'Education', 'Legal'];
+  const locations = [
+    'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Malindi', 'Kitale', 'Garissa', 'Kakamega',
+    'Machakos', 'Meru', 'Nyeri', 'Kericho', 'Kilifi', 'Embu', 'Kisii', 'Naivasha', 'Bungoma', 'Nyahururu',
+    'Kwale', 'Voi', 'Kitui', 'Homabay', 'Migori', 'Busia', 'Siaya', 'Kajiado', 'Nanyuki', 'Muranga',
+    'Kiambu', 'Kapsabet', 'Kapenguria', 'Bomet', 'Isiolo', 'Wajir', 'Mandera', 'Marsabit', 'Lodwar',
+    'Tharaka-Nithi', 'Makueni', 'Nandi', 'Baringo', 'Laikipia', 'Samburu', 'Trans Nzoia', 'Uasin Gishu',
+    'West Pokot', 'Taita-Taveta', 'Turkana', 'Vihiga', 'Lamu'
+  ];
   const jobTypes = ['Full-time', 'Part-time', 'Contract', 'Internship'];
 
   useEffect(() => {
@@ -34,14 +46,15 @@ const App = () => {
 
   const handleLogin = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    if (loginEmail === 'admin@jobskenya.co.ke' && loginPassword === 'admin123') {
+    
+    if (loginEmail === ADMIN_EMAIL && loginPassword === ADMIN_PASSWORD) {
       setIsAdmin(true);
       setShowLogin(false);
       setCurrentView('dashboard');
       setLoginEmail('');
       setLoginPassword('');
     } else {
-      alert('Invalid credentials. Use: admin@jobskenya.co.ke / admin321');
+      alert('Invalid email or password. Please try again.');
     }
   };
 
@@ -67,9 +80,88 @@ const App = () => {
     setShowJobForm(false);
   };
 
+  const handleShareJob = (job) => {
+    setShareJob(job);
+    setShowShareModal(true);
+  };
+
+  const getWebsiteUrl = () => {
+    return window.location.origin;
+  };
+
+  const shareToFacebook = (job) => {
+    const url = getWebsiteUrl();
+    const text = `${job.title} at ${job.company} - ${job.location}. Salary: ${job.salary}`;
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const shareToWhatsApp = (job) => {
+    const url = getWebsiteUrl();
+    const text = `🔥 *${job.title}* at *${job.company}*\n📍 ${job.location}\n💰 ${job.salary}\n\n${job.description}\n\nApply now: ${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const shareToTwitter = (job) => {
+    const url = getWebsiteUrl();
+    const text = `${job.title} at ${job.company} - ${job.location}. ${job.salary}`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+  };
+
+  const shareToLinkedIn = (job) => {
+    const url = getWebsiteUrl();
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+  };
+
+  const copyJobLink = (job) => {
+    const url = getWebsiteUrl();
+    const text = `${job.title} at ${job.company} - Apply now: ${url}`;
+    navigator.clipboard.writeText(text);
+    alert('Job link copied to clipboard!');
+  };
+
+  const ShareModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-md w-full p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Share Job</h2>
+          <button onClick={() => setShowShareModal(false)}><X className="w-6 h-6" /></button>
+        </div>
+        {shareJob && (
+          <div className="mb-6">
+            <h3 className="font-bold text-lg mb-2">{shareJob.title}</h3>
+            <p className="text-gray-600 text-sm">{shareJob.company} - {shareJob.location}</p>
+          </div>
+        )}
+        <div className="space-y-3">
+          <button onClick={() => shareJob && shareToWhatsApp(shareJob)} className="w-full flex items-center gap-3 bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600">
+            <MessageCircle className="w-5 h-5" />
+            <span className="font-semibold">Share on WhatsApp</span>
+          </button>
+          <button onClick={() => shareJob && shareToFacebook(shareJob)} className="w-full flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700">
+            <Facebook className="w-5 h-5" />
+            <span className="font-semibold">Share on Facebook</span>
+          </button>
+          <button onClick={() => shareJob && shareToTwitter(shareJob)} className="w-full flex items-center gap-3 bg-sky-500 text-white px-4 py-3 rounded-lg hover:bg-sky-600">
+            <Twitter className="w-5 h-5" />
+            <span className="font-semibold">Share on Twitter</span>
+          </button>
+          <button onClick={() => shareJob && shareToLinkedIn(shareJob)} className="w-full flex items-center gap-3 bg-blue-700 text-white px-4 py-3 rounded-lg hover:bg-blue-800">
+            <Linkedin className="w-5 h-5" />
+            <span className="font-semibold">Share on LinkedIn</span>
+          </button>
+          <button onClick={() => shareJob && copyJobLink(shareJob)} className="w-full flex items-center gap-3 bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700">
+            <Share2 className="w-5 h-5" />
+            <span className="font-semibold">Copy Link</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   if (currentView === 'dashboard' && isAdmin) {
     return (
       <div className="min-h-screen bg-gray-50">
+        {showShareModal && <ShareModal />}
         {showJobForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-screen overflow-y-auto">
@@ -128,6 +220,7 @@ const App = () => {
                   <p className="text-xs text-gray-500 mt-1">{job.posted}</p>
                 </div>
                 <div className="flex gap-2">
+                  <button onClick={() => handleShareJob(job)} className="text-green-600 hover:bg-green-50 p-2 rounded" title="Share Job"><Share2 className="w-5 h-5" /></button>
                   <button onClick={() => { setEditingJob(job); setJobForm(job); setShowJobForm(true); }} className="text-blue-600 hover:bg-blue-50 p-2 rounded"><Edit2 className="w-5 h-5" /></button>
                   <button onClick={() => window.confirm('Delete?') && setJobs(jobs.filter(j => j.id !== job.id))} className="text-red-600 hover:bg-red-50 p-2 rounded"><Trash2 className="w-5 h-5" /></button>
                 </div>
@@ -141,6 +234,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+      {showShareModal && <ShareModal />}
       {showLogin && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
@@ -151,11 +245,6 @@ const App = () => {
             <div className="space-y-4">
               <input type="email" placeholder="Email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleLogin(e)} className="w-full border rounded px-3 py-2" />
               <input type="password" placeholder="Password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleLogin(e)} className="w-full border rounded px-3 py-2" />
-              <div className="bg-blue-50 p-3 rounded text-sm">
-                <strong>Demo credentials:</strong><br/>
-                Email: admin@jobskenya.co.ke<br/>
-                Password: admin123
-              </div>
               <button onClick={(e) => handleLogin(e)} className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Login</button>
             </div>
           </div>
@@ -241,9 +330,14 @@ const App = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">{job.category}</span>
-                  <button className="bg-green-600 text-white px-6 py-2 rounded flex items-center gap-2 hover:bg-green-700">
-                    Apply Now<ChevronRight className="w-4 h-4" />
-                  </button>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleShareJob(job)} className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                      <Share2 className="w-4 h-4" />Share
+                    </button>
+                    <button className="bg-blue-600 text-white px-6 py-2 rounded flex items-center gap-2 hover:bg-blue-700">
+                      Apply Now<ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
